@@ -6,26 +6,54 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel, FieldError } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
-import { Package,  Loader2, Plus, Tag } from "lucide-react";
-import { ProductInput, productSchema } from '@/schema/product';
+import { Package,  Loader2, Plus, Tag, X } from "lucide-react";
+import { Product, ProductInput, productSchema } from '@/schema/product';
 import { Textarea } from '@/components/ui/textarea';
+import { useEffect } from 'react';
 
 interface ProductFormProps {
   onSubmit: (values: ProductInput) => void;
   isPending: boolean;
+  editingProduct?: Product | null;
+  onCancel?: () => void;
 }
 
-export function ProductForm({ onSubmit, isPending }: ProductFormProps) {
+export function ProductForm({ onSubmit, isPending, editingProduct, onCancel }: ProductFormProps) {
   const form = useForm<ProductInput>({
     resolver: zodResolver(productSchema) ,
     defaultValues: { name: '', price: 0, category: '', description: '', userId: 'cmo0gl0tz0000ngutu8ns7aob' },
   });
 
+  useEffect(() => {
+    if (editingProduct) {
+      form.reset({
+        name: editingProduct.name,
+        price: Number(editingProduct.price),
+        category: editingProduct.category,
+        description: editingProduct.description,
+        userId: editingProduct.userId,
+      });
+    } else {
+      form.reset({ name: '', price: 0, category: '', description: '', userId: 'cmo0gl0tz0000ngutu8ns7aob' });
+    }
+  }, [editingProduct, form]);
+
   const handleInternalSubmit = async (values: ProductInput) => {
  try {
     // Tambahkan 'await' agar form tidak langsung terhapus
     await onSubmit(values); 
-    console.log("data yang terkirim", values)
+    const dataToSubmit = {
+      ...values,
+      price: Number(values.price),
+    };
+    console.log("Data berhasil dikirim:", dataToSubmit);
+    form.reset({
+            name: '',
+            price: 0,
+            category: '',
+            description: '',
+            userId: values.userId // tetap pertahankan userId jika diperlukan
+        });
   } catch (error) {
     console.error("Gagal mengirim ke database:", error);
   }
@@ -84,11 +112,16 @@ export function ProductForm({ onSubmit, isPending }: ProductFormProps) {
               {form.formState.errors.description && <FieldError>{form.formState.errors.description.message}</FieldError>}
             </Field>
 
-            <div className='flex justify-center'>
+            <div className='flex gap-2 justify-center'>
               <Button className="w-50 cursor-pointer hover:scale-110" type="submit" disabled={isPending}>
                 {isPending ? <Loader2 className="animate-spin mr-2" size={16} /> : <Plus className="mr-2" size={16} />}
                 Tambah Produk
               </Button>
+              {editingProduct && (
+                <Button variant="outline" type="button" onClick={onCancel}>
+                  <X className="mr-2" size={16} /> Batal Edit
+                </Button>
+              )}
             </div>
           </FieldGroup>
         </form>

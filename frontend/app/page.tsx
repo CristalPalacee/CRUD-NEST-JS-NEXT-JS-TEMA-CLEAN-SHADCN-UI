@@ -1,5 +1,6 @@
-import { redirect } from "next/navigation";
+import SalesPage from "./home/components/sales/page";
 
+// frontend/app/page.tsx
 export default function Home() {
-redirect('/register');
+  return <SalesPage/>
 }

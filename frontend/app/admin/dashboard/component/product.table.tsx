@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trash2, Loader2, LayoutDashboard, } from "lucide-react";
+import { Trash2, Loader2, LayoutDashboard, Pencil, } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Product } from "@/schema/product";
 
@@ -13,9 +13,11 @@ interface ProductTableProps {
   isLoading: boolean;
   onDelete: (id: number) => void;
   isDeleting: boolean;
+  onEdit: (product: Product) => void;
+  
 }
 
-export function ProductTable({ product, isLoading, onDelete, isDeleting }: ProductTableProps) {
+export function ProductTable({ product, isLoading, onDelete, isDeleting, onEdit }: ProductTableProps) {
   return (
     <Card className="shadow-lg border-none">
       <CardHeader>
@@ -45,6 +47,18 @@ export function ProductTable({ product, isLoading, onDelete, isDeleting }: Produ
                   </TableCell>
                   <TableCell>Rp {Number(p.price).toLocaleString()}</TableCell>
                   <TableCell className="text-right">
+
+                  {/* Button Edit */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-blue-500 hover:text-blue-700 hover:bg-blue-50"
+                        onClick={() => onEdit(p)}
+                        disabled={isDeleting}
+                      >
+                        <Pencil size={16} />
+                      </Button>
+                {/* Button Delete */}
                     <Button
                       variant="ghost" size="icon" className="text-destructive"
                       onClick={() => {

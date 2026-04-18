@@ -11,10 +11,11 @@ export async function GET( { params }: { params: { id: string } }) {
 }
 
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
 try {
+    const { id } = await params;
     const body = await req.json()
-    const res = await fetch(`${API_URL}/api/v1/product/${params.id}`, {
+    const res = await fetch(`${API_URL}/api/v1/product/${id}`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json'

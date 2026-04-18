@@ -83,6 +83,48 @@ export const useProduct = () => {
     },
   });
 
+  // LOGIKA UPDATE PRODUCT //
+  const { mutateAsync: updateProduct, isPending: isUpdating } = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: ProductInput }) => {
+      const response = await fetch(`/api/product/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      } );
+
+     
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Gagal mengupdate produk");
+      }
+
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["product"] });
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "Produk berhasil diupdate.",
+        timer: 1500,
+        showConfirmButton: false,
+      })
+    },
+    onError: (error) => {
+      Swal.fire({
+        icon: "error",
+        title: "Gagal Update Product!",
+        text: error.message,
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    }
+  });
+
   // Fungsi pembungkus untuk konfirmasi hapus
   const confirmDelete = (id: number) => {
     Swal.fire({
@@ -108,6 +150,10 @@ export const useProduct = () => {
     // Delete Logic
     isDeleting: deleteMutation.isPending,
     deleteProduct: confirmDelete,
+
+    // Update Logic
+    isUpdating: isUpdating,
+    updateProduct,
 
     // Data & Loading State
     product: productData?.data ?? [],

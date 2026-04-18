@@ -11,14 +11,26 @@ import { useProduct } from '@/hooks/product';
 import { useAuth } from '@/hooks/auth';
 import { ProductForm } from './component/product-form';
 import { ProductTable } from './component/product.table';
+import { useState } from "react";
+import { Product, ProductInput } from "@/schema/product";
 
 
 export default function AddProductPage() {
 
-    const { createProduct, product, deleteProduct, isCreate, isLoading, isDeleting } = useProduct();
+    const { createProduct, product, deleteProduct, isCreate, isLoading, isDeleting, updateProduct, isUpdating } = useProduct();
+    const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const { logout } = useAuth();
 
-
+    const handleFormSubmit = async (values: ProductInput) => {
+        if (editingProduct) {
+            // Jika sedang mode edit, panggil updateProduct
+            await updateProduct({ id: editingProduct.id, data: values });
+            setEditingProduct(null); // Reset setelah berhasil
+        } else {
+            // Jika tidak, tambah produk baru
+            await createProduct(values);
+        }
+    };
 
     return (
         <div className="p-8 max-w-4xl mx-auto">
@@ -39,14 +51,22 @@ export default function AddProductPage() {
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                 <div className="lg:col-span-5">
-                    <ProductForm onSubmit={createProduct} isPending={isCreate} />
+                    <ProductForm editingProduct={editingProduct} onCancel={() => setEditingProduct(null)} onSubmit={handleFormSubmit} isPending={isCreate || isUpdating} />
                 </div>
                 <div className="lg:col-span-7">
                     <ProductTable
+                        onEdit={(p) => {
+                            setEditingProduct(p)
+                            window.scrollTo({ top: 0, behavior: 'smooth' })
+
+                        }
+
+                        }
                         product={product}
                         isLoading={isLoading}
                         onDelete={deleteProduct}
                         isDeleting={isDeleting}
+
                     />
                 </div>
             </div>
